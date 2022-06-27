@@ -33,18 +33,18 @@ def f_normal(inputs):
         if income==1 or income==2:
             y=-1.0
         elif income==3:
-            y=(new_rt[1]-2.0)/2.0 #median: x.index[1]             
+            y=(new_rt[1]-2.0)/2.0             
         elif income==4:    
-            y=(new_rt[2]-5.0)/5.0 #median: x.index[2]             
+            y=(new_rt[2]-5.0)/5.0              
         else:
             y=-1.0
     elif assets_type==3:
         if income==1 or income==2:
-            y=(new_rt[3]-10.0)/10.0 #median: x.index[1]  
+            y=(new_rt[3]-10.0)/10.0  
         elif income==3:
-            y=(new_rt[4]-20.0)/20.0 #median: x.index[1]             
+            y=(new_rt[4]-20.0)/20.0            
         elif income==4:    
-            y=(new_rt[5]-30.0)/30.0 #median: x.index[2]             
+            y=(new_rt[5]-30.0)/30.0             
         else:
             y=-1.0        
     return  y
@@ -63,11 +63,11 @@ def f_strong(inputs):
     y=-1.0
     if assets_type==1:
         if income==1 or income==2: #low/lower middle
-            y=(new_rt[2]-5)/5 #median: x.index[1]                               
+            y=(new_rt[2]-5)/5                            
         elif income==3: #upper middle
-            y=(new_rt[3]-10)/10 #median: x.index[2]  
+            y=(new_rt[3]-10)/10  
         elif  income==4: #high
-            y=(new_rt[4]-20)/20 #median: x.index[3]  
+            y=(new_rt[4]-20)/20 
         else:
             y=-1.0    
     elif assets_type==2:

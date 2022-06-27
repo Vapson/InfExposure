@@ -2,7 +2,7 @@
 """
 Created on Sat Mar  6 02:29:15 2021
 
-@author: Administrator
+@author: Vapson
 """
 
 from osgeo import gdal
@@ -42,8 +42,8 @@ def array2Raster(array,ref_tif,output_path,**tif_geotrans):
         tif_height=array.shape[1]
         tif_width=array.shape[2]
         output = driver.Create(output_path,tif_width, tif_height,array.shape[0],gdal.GDT_Float32) 
-        output.SetGeoTransform(tif_geotrans) #写入仿射变换参数
-        output.SetProjection(tif_proj) #写入投影
+        output.SetGeoTransform(tif_geotrans) 
+        output.SetProjection(tif_proj)
         for a in range(array.shape[0]):   
             output.GetRasterBand(a+1).WriteArray(array[a,:,:])  
         output = None 

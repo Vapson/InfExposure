@@ -124,33 +124,4 @@ for name in types:
             ref_tif='ref_tif.tif'
             output_path='H:\\h\\rain\\revised_results\\results_for_rt_change\\'+name+'_under_'+scen+'_'+time+'_mme.tif'
             basefunc.array2Raster(out,ref_tif,output_path)
-    
-
-scen='rcp85'
-time='20702099'
-types=['motorway','trunk','primary','secondary','tertiary','railway']#
-for name in types:
-    if name=='motorway' or name=='trunk' or name=='primary' or name=='secondary':
-        assets_type=1.0
-    if name=='tertiary':
-        assets_type=2.0
-    if name=='railway':
-        assets_type=3.0
       
-    assets_type=np.full((1,720,1440),assets_type)
-    income=basefunc.getRaster('income_group.tif')
-    income=income.reshape(1,720,1440)
-    new_rt=basefunc.getRaster('H:\\h\\rain\\revised_results\\results_for_compare\\newRT_under_'+scen+'_'+time+'_mme.tif')
-    
-    array=np.concatenate((income,assets_type,new_rt),axis=0)
-    rt_change=np.apply_along_axis(f_normal,0,array)
-    rt_change=rt_change.reshape(1,720,1440)
-       
-    length=basefunc.getRaster('H:\\h\\rain\\revised_results\\GISdata\\RoadandRailway\\global_'+name+'_720vs1440.tif')
-    length=length.reshape(1,720,1440)
-    out=np.concatenate((length,rt_change),axis=0)
-    
-    ref_tif='ref_tif.tif'
-    output_path='H:\\h\\rain\\revised_results\\results_for_compare\\rtChange_'+name+'_under_'+scen+'_'+time+'_mme.tif'
-    basefunc.array2Raster(out,ref_tif,output_path)
-    

@@ -2,7 +2,7 @@
 """
 Created on Mon May  2 17:07:39 2022
 
-@author: wangx
+@author: Vapson
 """
 
 import numpy as np
@@ -115,28 +115,3 @@ def gev_for_rt(inputs):
                 gevST=np.array([-1]*len(rt))
                 RT=np.array([-1]*len(rt))
                 return np.concatenate((gevST,RT))
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

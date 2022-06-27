@@ -10,7 +10,6 @@ import basefunc
 
 def f_normal(inputs):
     """
-    i=0,1,2,3：motorway et.al，else：tertiary
                 motorway et.al return period/year、tertiary return period/year
     high income：10、5
     upper middle income：5、2

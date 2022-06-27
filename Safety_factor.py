@@ -11,7 +11,6 @@ import basefunc
 
 def f_normal(inputs):
     """
-    i=0,1,2,3：motorway et.al，else：tertiary
                 motorway et.al return period/year、tertiary return period/year
     high income：10、5
     upper middle income：5、2
@@ -98,7 +97,7 @@ def f_strong(inputs):
 '''main'''
 #single asset type
 name='railway'
-types=['motorway','trunk','primary','secondary','tertiary','railway']#
+types=['motorway','trunk','primary','secondary','tertiary','railway']
 his_pre=basefunc.getRaster('H:\\h\\rain\\revised_results\\results_for_gev\\historical_mme.tif')
 for name in types:
     scens=['rcp45','rcp85']
@@ -126,7 +125,7 @@ for name in types:
 
     
 #mean results of all types 
-types=['motorway','trunk','primary','secondary','tertiary','railway']# 
+types=['motorway','trunk','primary','secondary','tertiary','railway']
 scens=['rcp45','rcp85']
 times=['20302059','20702099']
 for scen in scens:
@@ -137,7 +136,7 @@ for scen in scens:
             data[i,:,:]=basefunc.getRaster('H:\\h\\rain\\revised_results\\results_for_amf\\f_normal\\'+name+'_under_'+scen+'_'+time+'_mme.tif')
             i=i+1
         data[data==-1]=np.nan
-        data[data<0]=np.nan#filter the parts that did not pass ks test
+        data[data<0]=np.nan #filter the parts that did not pass ks test
         amf_mean=np.nanmean(data,axis=0)
         
         ref_tif='ref_tif.tif'

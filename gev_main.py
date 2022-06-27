@@ -125,30 +125,9 @@ ref_tif='ref_tif.tif'
 output_path=r'H:\h\rain\revised_results\results_for_gev\historical_mme.tif'
 basefunc.array2Raster(rs,ref_tif,output_path)
 
-#multi-models
-for i in range((len(model))):
-    if smooth==False:
-        inputs=list(climate_data[i,:,:,:].reshape(30,-1).T)
-    # with smooth
-    if smooth==True:
-        inputs=smooth_input_data(climate_data[i,:,:,:])
-    
-    r=[]
-    for z in range(104):
-        print(datetime.datetime.now())
-        r.extend( multi_process( inputs[ z*10000:min( z*10000+10000,len(inputs) ) ]) )
-        print(datetime.datetime.now())
-    
-    rs=np.array(r).T.reshape(8,720,1440)
-    
-    ref_tif='ref_tif.tif'
-    output_path='H:\\h\\rain\\revised_results\\results_for_gev\\historical_'+model[i]+'.tif'
-    basefunc.array2Raster(rs,ref_tif,output_path)
-
 
 '''02 calculate pre for future values corresponding return periods'''
 
-'''multi-model mdian project'''
 def multi_process(prim):
     with ProcessPoolExecutor() as pool:
         results = pool.map(GEV.gev_for_rt, prim)
@@ -162,7 +141,6 @@ def future(scen,time_low,time_up):
     del climate_data
     
     historical_mme=basefunc.getRaster(r'H:\h\rain\revised_results\results_for_gev\historical_mme.tif')
-    #historical_mme=basefunc.getRaster(r'H:\h\rain\rain\result_30yr\water_capacity\median_change\historical_median_pre.tif')[:,::-1,:]
     # without smooth
     if smooth==False:
         inputs=np.concatenate((mme_median,historical_mme),axis=0)
@@ -221,54 +199,4 @@ for i in ['rcp45','rcp85']:
     basefunc.array2Raster(future_rt,ref_tif,output_path)
 
 
-'''multi models'''    
-def future(scen,time_low,time_up):
-    climate_data,model=read_data(scen,time_low,time_up)
-    climate_data=np.sort(climate_data,axis=1)
-    for i in range((len(model))):
-        historical_mme=basefunc.getRaster('H:\\h\\rain\\revised_results\\results_for_gev\\historical_'+model[i]+'.tif')
-        #historical_mme=basefunc.getRaster(r'H:\h\rain\rain\result_30yr\water_capacity\median_change\historical_median_pre.tif')[:,::-1,:]
-        # without smooth
-        if smooth==False:
-            inputs=np.concatenate((climate_data[i,:,:,:],historical_mme),axis=0)
-            inputs=list(inputs.reshape(38,-1).T)       
-        # with smooth
-        if smooth==True:
-            inputs=smooth_input_data(climate_data[i,:,:,:])
-            inputs=[list(inputs[i]) for i in range(len(inputs))]   
-            historical_mme=list(historical_mme.reshape(8,-1).T)
-            yy=[inputs[j].extend(historical_mme[j]) for j in range(len(inputs))] #yy has no use. "extend" could change the inputs         
-        
-        r=[]
-        for z in range(104):
-            print(datetime.datetime.now())
-            r.extend( multi_process( inputs[ z*10000:min( z*10000+10000,len(inputs) ) ]) )
-            print(datetime.datetime.now())
-            
-        r=np.array(r).T.reshape(16,720,1440)
-
-        future_pre=r[:8,:,:]
-        future_rt=r[-8:,:,:]
-    
-        ref_tif='ref_tif.tif'
-        outname=scen+'pre'+str(time_low)+str(time_up)+'_'+model[i]+'.tif'
-        output_path='H:\\h\\rain\\revised_results\\results_for_gev\\'+outname
-        basefunc.array2Raster(future_pre,ref_tif,output_path)
-    
-        outname='newRT_under_'+scen+'_'+str(time_low)+str(time_up)+'_'+model[i]+'.tif'
-        output_path='H:\\h\\rain\\revised_results\\results_for_gev\\'+outname
-        basefunc.array2Raster(future_rt,ref_tif,output_path)
-            
-    
-
-#main
-for i in ['rcp45','rcp85']:
-    scen=i
-    time_low=2030
-    time_up=2059
-    future(scen,2030,2059)
-
-    time_low=2070
-    time_up=2099
-    future(scen,time_low,time_up)
  

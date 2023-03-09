@@ -5,9 +5,14 @@ Created on Sat May  7 19:39:56 2022
 @author: Vapson
 """
 
-
-import numpy as np
+import os
+coding_home = r'H:\h\rain\revised_results\nc_revised_coding' # Please change the coding work folder at your own computer
+os.chdir(coding_home)
 import basefunc
+import numpy as np
+
+data_home = r'H:\h\rain\revised_results' # Please change the data folder at your own computer
+os.chdir(data_home)
 
 def f_normal(inputs):
     """

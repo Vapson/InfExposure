@@ -25,8 +25,10 @@ def f_normal(inputs):
     
     inputs[0]: income group index. 1: low income group, 2: lower middle income group, 3: upper middle income group, 4: high income group
     inputs[1]: assets_type. 1: Motorway/Trunk/Primary/Secondary,  2: Tertiary, 3: Railway
-    inputs[2:]: new return period in the future. 0: 1.1years, 1: 2years, 2: 5years, 3: 10years, 4: 20years, 5: 30years, 6: 50years, 7: 100years 
-    
+    inputs[-16:-8]: new RX1D under design standards
+    inputs[-8:]: historical RX1D under design standards
+                 (0: 1.1years, 1: 2years, 2: 5years, 3: 10years, 4: 20years, 5: 30years, 6: 50years, 7: 100years)
+                 
     output: the proportion of new return period to the historical design return period
     """
     income=inputs[0]
@@ -74,8 +76,10 @@ def f_strong(inputs):
     
     inputs[0]: income group index. 1: low income group, 2: lower middle income group, 3: upper middle income group, 4: high income group
     inputs[1]: assets_type. 1: Motorway/Trunk/Primary/Secondary,  2: Tertiary, 3: Railway
-    inputs[2:]: new return period in the future. 0: 1.1years, 1: 2years, 2: 5years, 3: 10years, 4: 20years, 5: 30years, 6: 50years, 7: 100years 
-    
+    inputs[-16:-8]: new RX1D under design standards
+    inputs[-8:]: historical RX1D under design standards
+                 (0: 1.1years, 1: 2years, 2: 5years, 3: 10years, 4: 20years, 5: 30years, 6: 50years, 7: 100years)
+                 
     output: the proportion of new return period to the historical design return period   
     """
     income=inputs[0]
@@ -129,7 +133,7 @@ for name in types:
                 assets_type=3.0
               
             assets_type=np.full((1,720,1440),assets_type)
-            income=basefunc.getRaster('income_group.tif')
+            income=basefunc.getRaster('./income_group.tif')
             income=income.reshape(1,720,1440)
             new_pre=basefunc.getRaster('./results_for_gev/'+scen+'pre'+time+'_mme.tif')
              

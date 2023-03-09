@@ -14,8 +14,8 @@ import numpy as np
 from concurrent.futures import ProcessPoolExecutor
 import datetime
 
-results_data_home = r'H:\h\rain\revised_results' # Please change the data folder at your own computer
-os.chdir(coding_home)
+data_home = r'H:\h\rain\revised_results' # Please change the data folder at your own computer
+os.chdir(data_home)
 
 
 

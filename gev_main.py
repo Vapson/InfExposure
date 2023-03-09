@@ -6,30 +6,30 @@ Created on Mon May  2 17:55:47 2022
 """
 
 import os
-os.chdir(r'H:\h\rain\revised_results\nc_revised_coding')
-
+coding_home = r'H:\h\rain\revised_results\nc_revised_coding' # Please change the coding work folder at your own computer
+os.chdir(coding_home)
+import basefunc
+import gev_function as GEV
 import numpy as np
 from concurrent.futures import ProcessPoolExecutor
-import basefunc
-import GEV
 import datetime
+
+results_data_home = r'H:\h\rain\revised_results' # Please change the data folder at your own computer
+os.chdir(coding_home)
+
 
 
 '''read_data'''
 
-def read_data(folder,time_low,time_up):
-    climate_data_path=os.path.join('H:\\h\\rain\\revised_results\\pre_for_fitting',folder)
+def read_data(scen,time_low,time_up):
+    '''
+    scen: scenario ('historical', 'rcp45' or 'rcp85')
+    time_low: start year (1971 for historical, 2030 for mid-21 century, 2070 for late-21 century)
+    time_up: end year (2000 for historical, 2059 for mid-21 century, 2099 for late-21 century)
+    '''    
+    climate_data_path=os.path.join('./pre_for_fitting',scen)
     model=os.listdir(climate_data_path)
     model.remove('GFDL-CM3')
-    '''
-    model.remove('bcc-csm1-1')
-    model.remove('BNU-ESM')
-    model.remove('CESM1-BGC')
-    model.remove('NorESM1-M')
-    model.remove('CCSM4')
-    model.remove('GFDL-ESM2G')
-    model.remove('inmcm4')
-    '''
     for i in range(len(model)):
         path=os.path.join(climate_data_path, model[i])
         all_files=os.listdir(path)
@@ -61,11 +61,14 @@ def read_data(folder,time_low,time_up):
     return climate_data,model
 
 
+
 '''with smoorh'''
 
 def neighbour(z,stack):
-    #z: input data
-    #stack: push start coordinate on stack, like stack = [(3,2)]
+    '''
+    z: input data
+    stack: push start coordinate on stack, like stack = [(3,2)]
+    '''
     neighbours = [(-1,-1), (-1,0), (-1,1), (0,1), (1,1), (1,0), (1,-1), (0,-1)]
     mask = np.zeros_like(z[0,:], dtype = bool)  
     x, y = stack.pop()
@@ -76,6 +79,7 @@ def neighbour(z,stack):
             and not mask[nx, ny]):
             mask[nx, ny] = True
     return z[:,mask]
+
 
 def smooth_input_data(z):
     new_data=[]
@@ -89,23 +93,27 @@ def smooth_input_data(z):
     return new_data
 
 
-smooth=False
+
+
+
+# smooth or not
 #smooth=True
+smooth=False
 
 '''01 calculate pre for historical values corresponding return periods'''
 
 climate_data,model=read_data('historical',1971,2000)
 climate_data=np.sort(climate_data,axis=1)
-mme_median=np.median(climate_data,axis=0)#*60*60*24 #convert to "mm"
-#del climate_data
-    
+mme_median=np.median(climate_data,axis=0) #*60*60*24 #convert to "mm"
+
+''' Multiprocess computing '''
 def multi_process(prim):
     with ProcessPoolExecutor() as pool:
         results = pool.map(GEV.gev_for_pre, prim)
         out = list(results)
     return out
-
-#for MME
+  
+# for MME
 # without smooth
 if smooth==False:
     inputs=list(mme_median.reshape(30,-1).T)
@@ -121,13 +129,15 @@ for z in range(104):
 
 rs=np.array(r).T.reshape(8,720,1440)
 
-ref_tif='ref_tif.tif'
-output_path=r'H:\h\rain\revised_results\results_for_gev\historical_mme.tif'
+ref_tif = './ref_tif.tif'
+output_path = r'./results_for_gev/historical_mme.tif'
 basefunc.array2Raster(rs,ref_tif,output_path)
+
 
 
 '''02 calculate pre for future values corresponding return periods'''
 
+''' Multiprocess computing '''
 def multi_process(prim):
     with ProcessPoolExecutor() as pool:
         results = pool.map(GEV.gev_for_rt, prim)
@@ -137,10 +147,10 @@ def multi_process(prim):
 def future(scen,time_low,time_up):
     climate_data,model=read_data(scen,time_low,time_up)
     climate_data=np.sort(climate_data,axis=1)
-    mme_median=np.median(climate_data,axis=0)#*60*60*24 #convert to "mm"
+    mme_median=np.median(climate_data,axis=0)
     del climate_data
     
-    historical_mme=basefunc.getRaster(r'H:\h\rain\revised_results\results_for_gev\historical_mme.tif')
+    historical_mme=basefunc.getRaster(r'./results_for_gev/historical_mme.tif')
     # without smooth
     if smooth==False:
         inputs=np.concatenate((mme_median,historical_mme),axis=0)
@@ -150,18 +160,17 @@ def future(scen,time_low,time_up):
         inputs=smooth_input_data(mme_median)
         inputs=[list(inputs[i]) for i in range(len(inputs))]   
         historical_mme=list(historical_mme.reshape(8,-1).T)
-        yy=[inputs[i].extend(historical_mme[i]) for i in range(len(inputs))] #yy has no use. "extend" could change the inputs         
+        yy=[inputs[i].extend(historical_mme[i]) for i in range(len(inputs))] # yy has no use. "extend" could change the inputs         
     
     r=[]
     for z in range(104):
         print(datetime.datetime.now())
         r.extend( multi_process( inputs[ z*10000:min( z*10000+10000,len(inputs) ) ]) )
-        print(datetime.datetime.now())
-    
+        print(datetime.datetime.now())   
     return r
     
 
-#main
+# main
 for i in ['rcp45','rcp85']:
     scen=i
     time_low=2030
@@ -172,13 +181,13 @@ for i in ['rcp45','rcp85']:
     future_pre=r[:8,:,:]
     future_rt=r[-8:,:,:]
 
-    ref_tif='ref_tif.tif'
+    ref_tif='./ref_tif.tif'
     outname=scen+'pre'+str(time_low)+str(time_up)+'_mme.tif'
-    output_path='H:\\h\\rain\\revised_results\\results_for_gev\\'+outname
+    output_path='./results_for_gev/'+outname
     basefunc.array2Raster(future_pre,ref_tif,output_path)
 
     outname='newRT_under_'+scen+'_'+str(time_low)+str(time_up)+'_mme.tif'
-    output_path='H:\\h\\rain\\revised_results\\results_for_gev\\'+outname
+    output_path='./results_for_gev/'+outname
     basefunc.array2Raster(future_rt,ref_tif,output_path)
     
     time_low=2070
@@ -189,13 +198,13 @@ for i in ['rcp45','rcp85']:
     future_pre=r[:8,:,:]
     future_rt=r[-8:,:,:]
 
-    ref_tif='ref_tif.tif'
+    ref_tif='./ref_tif.tif'
     outname=scen+'pre'+str(time_low)+str(time_up)+'_mme.tif'
-    output_path='H:\\h\\rain\\revised_results\\results_for_gev\\'+outname
+    output_path='./results_for_gev/'+outname
     basefunc.array2Raster(future_pre,ref_tif,output_path)
 
     outname='newRT_under_'+scen+'_'+str(time_low)+str(time_up)+'_mme.tif'
-    output_path='H:\\h\\rain\\revised_results\\results_for_gev\\'+outname
+    output_path='./results_for_gev/'+outname
     basefunc.array2Raster(future_rt,ref_tif,output_path)
 
 

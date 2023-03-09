@@ -5,27 +5,44 @@ Created on Fri May  6 18:52:58 2022
 @author: Vapson
 """
 
-import numpy as np
+import os
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
+
+coding_home = r'H:\h\rain\revised_results\nc_revised_coding' # Please change the coding work folder at your own computer
+os.chdir(coding_home)
 import basefunc
+import numpy as np
+
+data_home = r'H:\h\rain\revised_results' # Please change the data folder at your own computer
+os.chdir(data_home)
+
+# change f_normal to f_strong if higher design standards assumption are concerned.
+
 
 '''01 absolute exposure'''
 def absolute_exposure(data):
+    '''
+    data.shape[0]: change in return period
+    data.shape[1]: lat
+    data.shape[2]: lon
+    '''
     data[0,:,:][data[1,:,:]>-0.25]=0
     data[0,:,:][data[1,:,:]==-1]=0
     return data[0,:,:]
 
+
 #by assets type
-types=['motorway','trunk','primary','secondary','tertiary','railway']#
+types=['motorway','trunk','primary','secondary','tertiary','railway']
 scens=['rcp45','rcp85']
 times=['20302059','20702099']
 for name in types:
     for scen in scens:
         for time in times:
-            data=basefunc.getRaster('F:\\h\\rain\\revised_results\\results_for_rt_change\\f_strong\\'+name+'_under_'+scen+'_'+time+'_mme.tif')
+            data=basefunc.getRaster('./results_for_rt_change/f_normal/'+name+'_under_'+scen+'_'+time+'_mme.tif')
             a_exposure = absolute_exposure(data)
             
-            ref_tif='ref_tif.tif'
-            output_path='F:\\h\\rain\\revised_results\\results_for_exposure\\f_strong\\'+name+'_AE_under_'+scen+'_'+time+'_mme.tif'
+            ref_tif='./ref_tif.tif'
+            output_path='./results_for_exposure/f_normal/'+name+'_AE_under_'+scen+'_'+time+'_mme.tif'
             basefunc.array2Raster(a_exposure,ref_tif,output_path)        
 
 #all types
@@ -34,11 +51,11 @@ for scen in scens:
     for time in times:
         a_exposure=np.full((720,1440),0.0)
         for name in types:  
-            data=basefunc.getRaster('F:\\h\\rain\\revised_results\\results_for_rt_change\\f_normal\\'+name+'_under_'+scen+'_'+time+'_mme.tif')
+            data=basefunc.getRaster('./results_for_rt_change/f_normal/'+name+'_under_'+scen+'_'+time+'_mme.tif')
             a_exposure = absolute_exposure(data) + a_exposure
         
-        ref_tif='ref_tif.tif'
-        output_path='F:\\h\\rain\\revised_results\\results_for_exposure\\f_normal\\AE_under_'+scen+'_'+time+'_mme.tif'
+        ref_tif='./ref_tif.tif'
+        output_path='./results_for_exposure/f_normal/AE_under_'+scen+'_'+time+'_mme.tif'
         basefunc.array2Raster(a_exposure,ref_tif,output_path)     
 
 
@@ -51,25 +68,23 @@ def relative_exposure(exposed_length,length):
 
 
 #by types
-types=['motorway','trunk','primary','secondary','tertiary','railway']#
+types=['motorway','trunk','primary','secondary','tertiary','railway']
 scens=['rcp45','rcp85']
 times=['20302059','20702099']
 for name in types:
     for scen in scens:
         for time in times:
-            exposed_length=basefunc.getRaster('F:\\h\\rain\\revised_results\\results_for_exposure\\f_strong\\'+name+'_AE_under_'+scen+'_'+time+'_mme.tif')
-            length=basefunc.getRaster('F:\\h\\rain\\revised_results\\GISdata\\RoadandRailway\\global_'+name+'_720vs1440.tif')
+            exposed_length=basefunc.getRaster('./results_for_exposure/f_normal/'+name+'_AE_under_'+scen+'_'+time+'_mme.tif')
+            length=basefunc.getRaster('./GISdata/RoadandRailway/global_'+name+'_720vs1440.tif')
                 
             r_exposure = exposed_length/length
             
-            ref_tif='ref_tif.tif'
-            output_path='H:\\h\\rain\\revised_results\\results_for_exposure\\f_strong\\'+name+'_RE_under_'+scen+'_'+time+'_mme.tif'
-            basefunc.array2Raster(r_exposure,ref_tif,output_path)        
-    
-
+            ref_tif='./ref_tif.tif'
+            output_path='./results_for_exposure/f_normal/'+name+'_RE_under_'+scen+'_'+time+'_mme.tif'
+            basefunc.array2Raster(r_exposure,ref_tif,output_path)          
 
 #all types
-types=['motorway','trunk','primary','secondary','tertiary','railway']#
+types=['motorway','trunk','primary','secondary','tertiary','railway']
 scens=['rcp45','rcp85']
 times=['20302059','20702099']
 for scen in scens:
@@ -79,9 +94,9 @@ for scen in scens:
         if 'length' in vars():
             del length            
         for name in types:  
-            a_exposure=basefunc.getRaster('H:\\h\\rain\\revised_results\\results_for_exposure\\f_strong\\'+name+'_AE_under_'+scen+'_'+time+'_mme.tif')
-            leng=basefunc.getRaster('H:\\h\\rain\\revised_results\\results_for_rt_change\\f_strong\\'+name+'_under_'+scen+'_'+time+'_mme.tif')[0,:,:]
-            rt_change=basefunc.getRaster('H:\\h\\rain\\revised_results\\results_for_rt_change\\f_strong\\'+name+'_under_'+scen+'_'+time+'_mme.tif')[1,:,:]
+            a_exposure=basefunc.getRaster('./results_for_exposure/f_normal/'+name+'_AE_under_'+scen+'_'+time+'_mme.tif')
+            leng=basefunc.getRaster('./results_for_rt_change/f_normal/'+name+'_under_'+scen+'_'+time+'_mme.tif')[0,:,:]
+            rt_change=basefunc.getRaster('./results_for_rt_change/f_normal/'+name+'_under_'+scen+'_'+time+'_mme.tif')[1,:,:]
             leng[rt_change==-1]=0
             
             a_exposure=a_exposure.reshape(1,720,1440)
@@ -95,8 +110,8 @@ for scen in scens:
         
         r_exposure = relative_exposure(exposed_length,length)
         
-        ref_tif='ref_tif.tif'
-        output_path='H:\\h\\rain\\revised_results\\results_for_exposure\\f_strong\\RE_under_'+scen+'_'+time+'_mme.tif'
+        ref_tif='./ref_tif.tif'
+        output_path='./results_for_exposure/f_normal/RE_under_'+scen+'_'+time+'_mme.tif'
         basefunc.array2Raster(r_exposure,ref_tif,output_path)        
 
 

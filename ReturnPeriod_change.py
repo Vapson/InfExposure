@@ -24,7 +24,7 @@ def f_normal(inputs):
     low middle/low income：2, 0, 10
     
     inputs[0]: income group index. 1: low income group, 2: lower middle income group, 3: upper middle income group, 4: high income group
-    inputs[1]: assets_type
+    inputs[1]: assets_type. 1: Motorway/Trunk/Primary/Secondary,  2: Tertiary, 3: Railway
     inputs[2:]: new return period in the future. 0: 1.1years, 1: 2years, 2: 5years, 3: 10years, 4: 20years, 5: 30years, 6: 50years, 7: 100years 
     
     output: the proportion of new return period to the historical design return period

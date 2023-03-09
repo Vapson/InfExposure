@@ -5,29 +5,34 @@ Created on Thu Apr 28 17:43:06 2022
 @author: Vapson
 """
 
-
 import os
-from netCDF4 import Dataset
-os.chdir(r'H:\h\rain\revised_results\nc_revised_coding')
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
+coding_home = r'H:\h\rain\revised_results\nc_revised_coding' # Please change the coding work folder at your own computer
+os.chdir(coding_home)
 import basefunc
+from netCDF4 import Dataset
 
+data_home = r'H:\h\rain\revised_results' # Please change the data folder at your own computer
+os.chdir(data_home)
+
+
+''' Calculate the annual maximum daily precipitation '''
 
 def rx1d(ref_tif,historical=True,rcp45=True,rcp85=True):
     if historical:
-        save_folder=r'H:\h\rain\revised_results\pre_for_fitting\historical'
-        pre_path=r'G:\GDDP-NEX-Prec\original\historical'
-        file=os.listdir(pre_path)
+        save_folder = './pre_for_fitting/historical'
+        pre_path = r'G:\GDDP-NEX-Prec\original\historical' # climate simulated data, download from NEX-GDDP CMIP5
+        file = os.listdir(pre_path)
         for i in range(len(file)):
             if int(file[i][-7:-3])>1970 and int(file[i][-7:-3])<=2000:
                 output_path=os.path.join(save_folder,file[i][:-3]+'.tif')
                 if os.path.exists( os.path.join(save_folder,output_path)):
                     continue
                 else:
-                    rootgrp = Dataset(os.path.join(pre_path,file[i])) #open nc data
-                    #variables=rootgrp.variables.keys() #see variables
-                    data=rootgrp.variables['pr'][:] #read data of our variable
+                    rootgrp = Dataset(os.path.join(pre_path,file[i])) # open nc data
+                    #variables=rootgrp.variables.keys() # see variables
+                    data=rootgrp.variables['pr'][:] # read data of our variable
                     array=data.max(0)[::-1,:]
                     
                     basefunc.array2Raster(array,ref_tif,output_path)
@@ -35,7 +40,7 @@ def rx1d(ref_tif,historical=True,rcp45=True,rcp85=True):
                     del data
             
     if rcp45:
-        save_folder=r'H:\h\rain\revised_results\pre_for_fitting\rcp45'
+        save_folder='./pre_for_fitting/rcp45'
         pre_path=r'G:\GDDP-NEX-Prec\original\rcp45'
         file=os.listdir(pre_path)
         for i in range(len(file)):    
@@ -58,7 +63,7 @@ def rx1d(ref_tif,historical=True,rcp45=True,rcp85=True):
                         except:
                             print('error:',file[i])
     if rcp85:
-        save_folder=r'H:\h\rain\revised_results\pre_for_fitting\rcp85'
+        save_folder='./pre_for_fitting/rcp85'
         pre_path=r'G:\GDDP-NEX-Prec\original\rcp85'
         file=os.listdir(pre_path)
         for i in range(len(file)):    
@@ -79,9 +84,11 @@ def rx1d(ref_tif,historical=True,rcp45=True,rcp85=True):
                             print('finished:',file[i])
                             del data
                         except:
-                            print('error:',file[i])                            
-#main                    
-ref_tif='ref_tif.tif'
+                            print('error:',file[i])   
+                            
+                            
+# main                    
+ref_tif='./ref_tif.tif'
 rx1d(ref_tif,historical=False)
 
 

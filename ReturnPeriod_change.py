@@ -58,22 +58,29 @@ def f_normal(inputs):
 
 def f_strong(inputs):
     """
-                return period/years: motorway et.al 、tertiary、railways
-    high income：20、10、50
-    upper middle income：10、5、30
-    low middle/low income：5、0、20
+    According to higher design standards assumption (see supplementary Table S1)
+    
+                return period/years: motorway et.al, tertiary, railways
+    high income：20, 10, 50
+    upper middle income：10, 5, 30
+    low middle/low income：5, 0, 20
+    
+    inputs[0]: income group index. 1: low income group, 2: lower middle income group, 3: upper middle income group, 4: high income group
+    inputs[1]: assets_type
+    inputs[2:]: new return period in the future. 0: 1.1years, 1: 2years, 2: 5years, 3: 10years, 4: 20years, 5: 30years, 6: 50years, 7: 100years 
+    
+    output: the proportion of new return period to the historical design return period
     """
-    #new_rt[]👉 0: 1.1years、1: 2years、2: 5years、3: 10years、4: 20years、5: 30years、6: 50years 7: 100years 
     income=inputs[0]
     assets_type=inputs[1]
     new_rt=inputs[-8:]
     y=-1.0
     if assets_type==1:
-        if income==1 or income==2: #low/lower middle
+        if income==1 or income==2: 
             y=(new_rt[2]-5)/5                            
-        elif income==3: #upper middle
+        elif income==3: 
             y=(new_rt[3]-10)/10  
-        elif  income==4: #high
+        elif  income==4: 
             y=(new_rt[4]-20)/20 
         else:
             y=-1.0    
@@ -98,10 +105,8 @@ def f_strong(inputs):
     return  y
 
 
-'''main'''
-#single asset type
-name='railway'
-types=['motorway','trunk','primary','secondary','tertiary','railway']#
+# main
+types=['motorway','trunk','primary','secondary','tertiary','railway']
 for name in types:
     scens=['rcp45','rcp85']
     times=['20302059','20702099']
@@ -117,17 +122,17 @@ for name in types:
             assets_type=np.full((1,720,1440),assets_type)
             income=basefunc.getRaster('income_group.tif')
             income=income.reshape(1,720,1440)
-            new_rt=basefunc.getRaster('H:\\h\\rain\\revised_results\\results_for_gev\\newRT_under_'+scen+'_'+time+'_mme.tif')
+            new_rt=basefunc.getRaster('./results_for_gev/newRT_under_'+scen+'_'+time+'_mme.tif')
             
             array=np.concatenate((income,assets_type,new_rt),axis=0)
             rt_change=np.apply_along_axis(f_strong,0,array)
             rt_change=rt_change.reshape(1,720,1440)
                
-            length=basefunc.getRaster('H:\\h\\rain\\revised_results\\GISdata\\RoadandRailway\\global_'+name+'_720vs1440.tif')
+            length=basefunc.getRaster('./GISdata/RoadandRailway/global_'+name+'_720vs1440.tif')
             length=length.reshape(1,720,1440)
             out=np.concatenate((length,rt_change),axis=0)
             
-            ref_tif='ref_tif.tif'
-            output_path='H:\\h\\rain\\revised_results\\results_for_rt_change\\'+name+'_under_'+scen+'_'+time+'_mme.tif'
+            ref_tif='./ref_tif.tif'
+            output_path='./results_for_rt_change/'+name+'_under_'+scen+'_'+time+'_mme.tif'
             basefunc.array2Raster(out,ref_tif,output_path)
       
